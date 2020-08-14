@@ -11,16 +11,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.hw81.R;
-import com.example.hw81.controller.LoginActivity;
 
 public class SignupActivity extends AppCompatActivity {
     public static final String EXTRA_USER_NAME_PASSWORD_SIGN_UP = "com.example.hw81.username_password";
     public static final String EXTRA_CURRENT_INDEX = "com.example.hw81.current_index";
+
     private TextView mTextUserName;
     private TextView mTextPassword;
     private Button mButtonSignUp;
 
-    private UsersInfo[] mUsersInfos = new UsersInfo[10];
+    private UsersInfo[] mUsersInfo;
     private static int mCurrentIndex;
     private UsersInfo user;
 
@@ -33,10 +33,10 @@ public class SignupActivity extends AppCompatActivity {
         findViews();
         setListener();
 
-
         Bundle userPass = getIntent().getExtras();
         if (userPass != null) {
-            user = (UsersInfo) userPass.getSerializable(LoginActivity.EXTRA_USER_NAME_LOGIN);
+            user = (UsersInfo) userPass.getSerializable(LoginActivity.EXTRA_USER_NAME_PASSWORD_LOGIN);
+            mUsersInfo = (UsersInfo[]) userPass.getSerializable(LoginActivity.EXTRA_USER_INFO_ARRAY_LOG_IN);
 
             if (user.getUserName() != null && user.getUserPassword() != 0) {
                 mTextUserName.setText(user.getUserName());
@@ -45,9 +45,7 @@ public class SignupActivity extends AppCompatActivity {
                 mTextUserName.setText(user.getUserName());
             } else if (user.getUserName() == null && user.getUserPassword() != 0) {
                 mTextPassword.setText(String.valueOf(user.getUserPassword()));
-
             }
-
 
         }
     }
@@ -62,10 +60,10 @@ public class SignupActivity extends AppCompatActivity {
                 if (mTextPassword.getText().toString().trim().isEmpty())
                     Toast.makeText(SignupActivity.this, "User Password is empty, please enter your user password",
                             Toast.LENGTH_LONG).show();
-                if (mTextUserName.getText().toString().equals("") && mTextPassword.length() == 0)
+                if (mTextUserName.getText().toString().equals("") && mTextPassword.getText().toString().trim().isEmpty())
                     Toast.makeText(SignupActivity.this, "User Name and User Password are empty, please fill them",
                             Toast.LENGTH_SHORT).show();
-                if (!mTextUserName.getText().toString().equals("") && mTextPassword.length() != 0) {
+                if (!mTextUserName.getText().toString().equals("") && !mTextPassword.getText().toString().trim().isEmpty()) {
                     setEditText();
                     finish();
                 }
@@ -77,8 +75,8 @@ public class SignupActivity extends AppCompatActivity {
         Intent intent = new Intent();
         String userName = mTextUserName.getText().toString();
         int userPassword = Integer.parseInt(mTextPassword.getText().toString());
-        mUsersInfos[mCurrentIndex++] = new UsersInfo(userName, userPassword);
-        intent.putExtra(EXTRA_USER_NAME_PASSWORD_SIGN_UP, mUsersInfos);
+        mUsersInfo[mCurrentIndex++] = new UsersInfo(userName, userPassword);
+        intent.putExtra(EXTRA_USER_NAME_PASSWORD_SIGN_UP, mUsersInfo);
         intent.putExtra(EXTRA_CURRENT_INDEX, mCurrentIndex);
         setResult(RESULT_OK, intent);
     }
