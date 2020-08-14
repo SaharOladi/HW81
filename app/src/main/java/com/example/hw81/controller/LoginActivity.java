@@ -8,24 +8,29 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.example.hw81.R;
+import com.google.android.material.snackbar.Snackbar;
 
 public class LoginActivity extends AppCompatActivity {
 
     public static final String EXTRA_USER_NAME_LOGIN = "com.example.hw81.UserName";
     public static final String EXTRA_PASSWORD_LOGIN = "com.example.hw81.PasswordValue";
+    public static final String EXTRA_INDEX = "com.example.hw81.currentIndex";
     public static final int SIGNUP_CODE = 0;
     private TextView mTextUserName;
     private TextView mTextPassword;
     private Button mButtonLogin;
     private Button mButtonSignUp;
 
-    private String mSignupString = "";
-    private int mSignupInt = 0;
+    private static UsersInfo[] mUsersInformations = new UsersInfo[10];
+    private int mCurrentIndex = 0;
+
+    private LinearLayout mLinearLayout;
 
 
     @Override
@@ -37,34 +42,61 @@ public class LoginActivity extends AppCompatActivity {
 
 
         setListener();
+
     }
 
     private void setListener() {
         mButtonSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                String userName = "";
+                int userPassword = 0;
+
                 Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
-                if (!mTextUserName.getText().toString().equals("")){
-                    String userName = mTextUserName.getText().toString();
-                    intent.putExtra(EXTRA_USER_NAME_LOGIN, userName);
+
+                if (!mTextUserName.toString().trim().isEmpty()) {
+                    userName = mTextUserName.getText().toString();
                 }
                 if (mTextPassword.length() != 0) {
-                    int userPassword = Integer.parseInt(mTextPassword.getText().toString());
-                    intent.putExtra(EXTRA_PASSWORD_LOGIN, userPassword);
+                    userPassword = Integer.parseInt(mTextPassword.getText().toString());
                 }
 
+                if (!userName.isEmpty() && userPassword != 0) {
+                    mUsersInformations[mCurrentIndex] = new UsersInfo(userName, userPassword);
+                    intent.putExtra(EXTRA_USER_NAME_LOGIN, mUsersInformations[mCurrentIndex].getUserName());
+                    intent.putExtra(EXTRA_PASSWORD_LOGIN, mUsersInformations[mCurrentIndex].getUserPassword());
+
+                } else if (userName.isEmpty() && userPassword != 0) {
+                    mUsersInformations[mCurrentIndex] = new UsersInfo("", userPassword);
+                    intent.putExtra(EXTRA_PASSWORD_LOGIN, mUsersInformations[mCurrentIndex].getUserPassword());
+
+                } else if (!userName.isEmpty() && userPassword == 0) {
+                    mUsersInformations[mCurrentIndex] = new UsersInfo(userName, Integer.parseInt(null));
+                    intent.putExtra(EXTRA_USER_NAME_LOGIN, mUsersInformations[mCurrentIndex].getUserName());
+                }
+
+                intent.putExtra(EXTRA_INDEX, mCurrentIndex);
                 startActivityForResult(intent, SIGNUP_CODE);
             }
         });
         mButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!mSignupString.equals(mTextUserName.getText().toString()) || 
-                        mSignupInt != Integer.parseInt(mTextPassword.getText().toString())){
-                    Toast.makeText(LoginActivity.this, "Sign up fields and Log in fields are not match",
-                            Toast.LENGTH_LONG).show();
+                for (int i = 0; i <= mCurrentIndex; i++) {
+                    if (mUsersInformations[i].getUserName().equals(mTextUserName.getText().toString())
+                            &&
+                            (mUsersInformations[i].getUserPassword() == Integer.parseInt(mTextPassword.getText().toString()))) {
+
+                        Snackbar snackbar = Snackbar.make(v, "You Can LOG IN", Snackbar.LENGTH_LONG);
+                        snackbar.show();
+                    } else {
+                        Snackbar snackbar = Snackbar.make(v, "You Can Not LOG IN", Snackbar.LENGTH_LONG);
+                        snackbar.show();
+                    }
+
                 }
-                // to do, add snackbar for show message
+
             }
         });
     }
@@ -75,23 +107,25 @@ public class LoginActivity extends AppCompatActivity {
         mTextPassword = (EditText) findViewById(R.id.txt_password);
         mButtonLogin = findViewById(R.id.btn_login);
         mButtonSignUp = findViewById(R.id.btn_sign_up);
+        mLinearLayout = findViewById(R.id.login);
     }
-    private void setResultFromSignUp(String strInp, int intInp){
+
+    private void setResultFromSignUp(String strInp, int intInp) {
         mTextUserName.setText(strInp);
-        mTextPassword.setText(""+intInp);
+        mTextPassword.setText("" + intInp);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(resultCode != SignupActivity.RESULT_OK || data == null) {
+        if (resultCode != SignupActivity.RESULT_OK || data == null) {
             return;
         }
-        if(requestCode == SIGNUP_CODE){
-            mSignupString = data.getStringExtra(SignupActivity.EXTRA_USER_NAME_SIGNUP);
-            mSignupInt = data.getIntExtra(SignupActivity.EXTRA_PASSWORD_SIGNUP,0);
+        if (requestCode == SIGNUP_CODE) {
+            mUsersInformations = (UsersInfo[]) data.getSerializableExtra(SignupActivity.EXTRA_USER_NAME_PASSWORD_SIGN_UP);
+            mCurrentIndex = data.getIntExtra(SignupActivity.EXTRA_CURRENT_INDEX, 0);
         }
-        setResultFromSignUp(mSignupString,mSignupInt);
+        setResultFromSignUp(mUsersInformations[mCurrentIndex].getUserName(), mUsersInformations[mCurrentIndex].getUserPassword());
     }
 }

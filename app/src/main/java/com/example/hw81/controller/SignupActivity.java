@@ -14,11 +14,14 @@ import com.example.hw81.R;
 import com.example.hw81.controller.LoginActivity;
 
 public class SignupActivity extends AppCompatActivity {
-    public static final String EXTRA_USER_NAME_SIGNUP = "com.example.hw81.username";
-    public static final String EXTRA_PASSWORD_SIGNUP = "com.example.hw81.password";
+    public static final String EXTRA_USER_NAME_PASSWORD_SIGN_UP = "com.example.hw81.username_password";
+    public static final String EXTRA_CURRENT_INDEX = "com.example.hw81.current_index";
     private TextView mTextUserName;
     private TextView mTextPassword;
     private Button mButtonSignUp;
+
+    private UsersInfo[] mUsersInfos = new UsersInfo[10];
+    private int mCurrentIndex = 0;
 
 
     @Override
@@ -34,12 +37,28 @@ public class SignupActivity extends AppCompatActivity {
         if (userPass != null) {
             String userName = userPass.getString(LoginActivity.EXTRA_USER_NAME_LOGIN);
             int userPassword = userPass.getInt(LoginActivity.EXTRA_PASSWORD_LOGIN);
-            mTextUserName.setText(userName);
-            mTextPassword.setText("" + userPassword);
+            mCurrentIndex = userPass.getInt(LoginActivity.EXTRA_INDEX);
+            mUsersInfos[mCurrentIndex] = new UsersInfo(userName, userPassword);
+
+            if (userName != null && userPassword != 0) {
+                mTextUserName.setText("" + mUsersInfos[mCurrentIndex].getUserName());
+                mTextPassword.setText("" + mUsersInfos[mCurrentIndex].getUserPassword());
+            } else if (userName != null && userPassword == 0) {
+                mTextUserName.setText("" + mUsersInfos[mCurrentIndex].getUserName());
+                mTextPassword.setText("");
+            } else if (userName == null && userPassword != 0) {
+                mTextUserName.setText("");
+                mTextPassword.setText("" + mUsersInfos[mCurrentIndex].getUserPassword());
+            } else {
+                mTextUserName.setText("");
+                mTextPassword.setText("");
+            }
+
         }
 
 
     }
+
 
     private void setListener() {
         mButtonSignUp.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +75,7 @@ public class SignupActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                 if (!mTextUserName.getText().toString().equals("") && mTextPassword.length() != 0) {
                     setEditText();
+                    mCurrentIndex = mCurrentIndex+1;
                     finish();
                 }
             }
@@ -66,9 +86,9 @@ public class SignupActivity extends AppCompatActivity {
         Intent intent = new Intent();
         String userName = mTextUserName.getText().toString();
         int userPassword = Integer.parseInt(mTextPassword.getText().toString());
-        intent.putExtra(EXTRA_USER_NAME_SIGNUP, userName);
-        intent.putExtra(EXTRA_PASSWORD_SIGNUP, userPassword);
-
+        mUsersInfos[mCurrentIndex] = new UsersInfo(userName, userPassword);
+        intent.putExtra(EXTRA_USER_NAME_PASSWORD_SIGN_UP, mUsersInfos);
+        intent.putExtra(EXTRA_CURRENT_INDEX, mCurrentIndex);
         setResult(RESULT_OK, intent);
     }
 
@@ -76,6 +96,6 @@ public class SignupActivity extends AppCompatActivity {
         mTextUserName = (EditText) findViewById(R.id.txt_username_second);
         mTextPassword = (EditText) findViewById(R.id.txt_password_second);
         mButtonSignUp = findViewById(R.id.btn_sign_up_second);
-
     }
+
 }
