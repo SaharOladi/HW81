@@ -21,7 +21,8 @@ public class SignupActivity extends AppCompatActivity {
     private Button mButtonSignUp;
 
     private UsersInfo[] mUsersInfos = new UsersInfo[10];
-    private int mCurrentIndex = 0;
+    private static int mCurrentIndex;
+    private UsersInfo user;
 
 
     @Override
@@ -35,30 +36,21 @@ public class SignupActivity extends AppCompatActivity {
 
         Bundle userPass = getIntent().getExtras();
         if (userPass != null) {
-            String userName = userPass.getString(LoginActivity.EXTRA_USER_NAME_LOGIN);
-            int userPassword = userPass.getInt(LoginActivity.EXTRA_PASSWORD_LOGIN);
-            mCurrentIndex = userPass.getInt(LoginActivity.EXTRA_INDEX);
-            mUsersInfos[mCurrentIndex] = new UsersInfo(userName, userPassword);
+            user = (UsersInfo) userPass.getSerializable(LoginActivity.EXTRA_USER_NAME_LOGIN);
 
-            if (userName != null && userPassword != 0) {
-                mTextUserName.setText("" + mUsersInfos[mCurrentIndex].getUserName());
-                mTextPassword.setText("" + mUsersInfos[mCurrentIndex].getUserPassword());
-            } else if (userName != null && userPassword == 0) {
-                mTextUserName.setText("" + mUsersInfos[mCurrentIndex].getUserName());
-                mTextPassword.setText("");
-            } else if (userName == null && userPassword != 0) {
-                mTextUserName.setText("");
-                mTextPassword.setText("" + mUsersInfos[mCurrentIndex].getUserPassword());
-            } else {
-                mTextUserName.setText("");
-                mTextPassword.setText("");
+            if (user.getUserName() != null && user.getUserPassword() != 0) {
+                mTextUserName.setText(user.getUserName());
+                mTextPassword.setText(String.valueOf(user.getUserPassword()));
+            } else if (user.getUserName() != null && user.getUserPassword() == 0) {
+                mTextUserName.setText(user.getUserName());
+            } else if (user.getUserName() == null && user.getUserPassword() != 0) {
+                mTextPassword.setText(String.valueOf(user.getUserPassword()));
+
             }
 
+
         }
-
-
     }
-
 
     private void setListener() {
         mButtonSignUp.setOnClickListener(new View.OnClickListener() {
@@ -67,7 +59,7 @@ public class SignupActivity extends AppCompatActivity {
                 if (mTextUserName.getText().toString().equals(""))
                     Toast.makeText(SignupActivity.this, "User Name is empty, please enter your user name",
                             Toast.LENGTH_LONG).show();
-                if (mTextPassword.length() == 0)
+                if (mTextPassword.getText().toString().trim().isEmpty())
                     Toast.makeText(SignupActivity.this, "User Password is empty, please enter your user password",
                             Toast.LENGTH_LONG).show();
                 if (mTextUserName.getText().toString().equals("") && mTextPassword.length() == 0)
@@ -75,7 +67,6 @@ public class SignupActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                 if (!mTextUserName.getText().toString().equals("") && mTextPassword.length() != 0) {
                     setEditText();
-                    mCurrentIndex = mCurrentIndex+1;
                     finish();
                 }
             }
@@ -86,7 +77,7 @@ public class SignupActivity extends AppCompatActivity {
         Intent intent = new Intent();
         String userName = mTextUserName.getText().toString();
         int userPassword = Integer.parseInt(mTextPassword.getText().toString());
-        mUsersInfos[mCurrentIndex] = new UsersInfo(userName, userPassword);
+        mUsersInfos[mCurrentIndex++] = new UsersInfo(userName, userPassword);
         intent.putExtra(EXTRA_USER_NAME_PASSWORD_SIGN_UP, mUsersInfos);
         intent.putExtra(EXTRA_CURRENT_INDEX, mCurrentIndex);
         setResult(RESULT_OK, intent);

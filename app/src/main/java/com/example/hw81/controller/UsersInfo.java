@@ -9,6 +9,9 @@ public class UsersInfo implements Serializable {
     private String userName;
     private int userPassword;
 
+    public UsersInfo() {
+    }
+
     public UsersInfo(String userName, int userPassword) {
         this.userName = userName;
         this.userPassword = userPassword;
